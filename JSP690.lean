@@ -82,6 +82,25 @@ theorem anyB_true_of_mem {α : Type} {l : List α} {p : α → Bool}
         | true =>
             simp [anyB, hpb]
 
+
+/-- `allB` is exactly universal quantification over list membership. -/
+theorem allB_eq_true_iff {α : Type} {l : List α} {p : α → Bool} :
+    allB l p = true ↔ ∀ a ∈ l, p a = true := by
+  induction l with
+  | nil =>
+      simp [allB]
+  | cons b l ih =>
+      simp [allB, ih]
+
+/-- `anyB` is exactly existential quantification over list membership. -/
+theorem anyB_eq_true_iff {α : Type} {l : List α} {p : α → Bool} :
+    anyB l p = true ↔ ∃ a ∈ l, p a = true := by
+  induction l with
+  | nil =>
+      simp [anyB]
+  | cons b l ih =>
+      simp [anyB, ih]
+
 /--
 A simple 3-uniform hypergraph in the list encoding:
 each edge has three distinct vertices, and the underlying sets are distinct.
@@ -102,6 +121,19 @@ def ProperB {C : Type} [DecidableEq C]
 def Proper {C : Type} [DecidableEq C]
     (H : Hypergraph) (c : Vertex → C) : Prop :=
   ProperB H c = true
+
+
+/--
+Semantic specification of proper weak hypergraph colouring.
+
+A colouring is proper exactly when every hyperedge contains two vertices
+with different colours; equivalently, no hyperedge is monochromatic.
+-/
+theorem proper_iff {C : Type} [DecidableEq C]
+    (H : Hypergraph) (c : Vertex → C) :
+    Proper H c ↔
+      ∀ e ∈ H, ∃ x ∈ e, ∃ y ∈ e, c x ≠ c y := by
+  simp [Proper, ProperB, allB_eq_true_iff, anyB_eq_true_iff]
 
 /-
 A structural enumeration of ALL Boolean functions Fin n → Bool.
